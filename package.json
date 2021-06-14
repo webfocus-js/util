@@ -1,6 +1,6 @@
 {
   "name": "@webfocus/util",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "General utilities for webfocus applications.",
   "main": "util.js",
   "keywords": [
@@ -8,7 +8,7 @@
     "utilities",
     "pagination"
   ],
-  "author": "",
+  "author": "diogoalmiro",
   "license": "MIT",
   "dependencies": {
     "@webfocus/component": "^0.0.1"
