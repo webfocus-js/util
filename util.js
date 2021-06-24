@@ -58,3 +58,28 @@ module.exports.pagination = (listGetterPromise, filter=null, map=null, step=20) 
         })
     }
 }
+
+module.exports.serversideevents = (component, events) => (req, res) => {
+    component.debug("Preparing Server Side Event Listeners")
+    // Prepare Event Source
+    res.set({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+        'Connection': 'keep-alive'
+    });
+    res.flushHeaders();
+
+    let listeners = {};
+    events.forEach(e => {
+        listeners[e] = (data) => {
+            res.write(`event: ${e}\n`);
+            res.write(`data: ${JSON.stringify(data)}\n\n`)
+        }
+        component.on(e, listeners[e]);
+    })
+
+    res.socket.on('close', () => {
+        component.debug("Removing Server Side Event Listeners")
+        events.forEach(e => component.off(e, listeners[e]))
+    })
+}
