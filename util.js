@@ -59,7 +59,7 @@ module.exports.pagination = (listGetterPromise, filter=null, map=null, step=20) 
     }
 }
 
-module.exports.serversideevents = (component, events) => (req, res) => {
+module.exports.serversideevents = (component, events, initCB) => (req, res) => {
     component.debug("Preparing Server Side Event Listeners")
     // Prepare Event Source
     res.set({
@@ -82,4 +82,12 @@ module.exports.serversideevents = (component, events) => (req, res) => {
         component.debug("Removing Server Side Event Listeners")
         events.forEach(e => component.off(e, listeners[e]))
     })
+
+    if( typeof initCB === 'function' ){
+        let sendEvent = (name, data) => {
+            res.write(`event: ${name}\n`);
+            res.write(`data: ${JSON.stringify(data)}\n`);
+        }
+        initCB(req, sendEvent);
+    } 
 }
