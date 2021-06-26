@@ -86,7 +86,7 @@ module.exports.serversideevents = (component, events, initCB) => (req, res) => {
     if( typeof initCB === 'function' ){
         let sendEvent = (name, data) => {
             res.write(`event: ${name}\n`);
-            res.write(`data: ${JSON.stringify(data)}\n`);
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
         }
         initCB(req, sendEvent);
     } 
