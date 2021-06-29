@@ -43,7 +43,8 @@ window.addEventListener('load', () => {
             let template = n.querySelector("template");
             pages.map(entry => {
                 let templateInstance = document.importNode(template.content, true);
-                let templatedName = (_match, possibleName) => entry.hasOwnProperty(possibleName) ? entry[possibleName].toString() : accessObj(entry, possibleName.split('.')).toString();
+                let templatedName = (_m, possibleName) => entry.hasOwnProperty(possibleName) ? toStringOrEmpty(entry[possibleName]) : accessObj(entry, possibleName.split('.')).toString();
+                    
                 templateInstance.querySelectorAll("[data-pagination-href]").forEach( a => a.href = a.dataset.paginationHref.replace(/#\{([^}]*)\}/g, templatedName))
                 templateInstance.querySelectorAll("[data-pagination-map]").forEach( element => {
                     let stringOrTemplate = element.dataset.paginationMap; 
@@ -52,7 +53,7 @@ window.addEventListener('load', () => {
                     }
                     else{
                         if( entry.hasOwnProperty(stringOrTemplate) ){
-                            element.textContent = entry[stringOrTemplate].toString();
+                            element.textContent = toStringOrEmpty(entry[stringOrTemplate]);
                         }
                         else{
                             element.textContent = stringOrTemplate.replace(/#\{([^}]*)\}/g, templatedName)
@@ -78,4 +79,8 @@ function accessObj(obj, propList){
         else            
             return accessObj(obj[key], propList.slice(1));
     }
+}
+
+function toStringOrEmpty(o){
+    return o==null ? '' : o.toString();
 }
