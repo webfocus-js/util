@@ -25,6 +25,6 @@
     requestJSON(form.getAttribute("action"), form.getAttribute("method"), value)
         .then(value => {
             form.disabled = false;
-            fun(value);
+            fun(value, form);
         });
 })
