@@ -57,7 +57,7 @@ export default class Pagination{
             
         templateInstance.querySelectorAll("[data-pagination-href]").forEach( a => a.href = ObjectUtil.valueFromMap(a.dataset.paginationHref, entry))
         templateInstance.querySelectorAll("[data-pagination-map]").forEach( element => {
-            let key = element.dataset.paginationKey || "textContext";
+            let key = element.dataset.paginationKey || "textContent";
             element[key] = ObjectUtil.valueFromMap(element.dataset.paginationMap, entry)
         })
         this.parent.appendChild(templateInstance)
