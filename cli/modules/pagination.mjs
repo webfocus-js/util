@@ -1,12 +1,15 @@
-let currentPage = new URLSearchParams(window.location.search);
+import ObjectUtil from './object-util.mjs';
 
-class Pagination{
+export default class Pagination{
     constructor(elem){
+        elem.paginationInstance = this;
         this.parent = elem;
-
+        
         this.id = elem.id; // distinguish multiple pagination using element's id
         this.url = elem.dataset.paginationUrl;
         
+        let currentPage = new URLSearchParams(window.location.search);
+
         this.start = parseInt(elem.dataset.paginationStart) || 0
         if( currentPage.has("start") ){
             this.start = parseInt(currentPage.get("start"));
@@ -48,53 +51,23 @@ class Pagination{
         pages.forEach(this.addEntry.bind(this));
     }
 
-    static toStringOrEmpty(o){
-        return o==null ? '' : o.toString();
-    }
-
-    static accessObj(obj, propList){
-        if( propList.length == 0) return obj;
-        else{
-            let key = propList[0];
-            if( obj[key] == null )
-                return obj;
-            else            
-                return Pagination.accessObj(obj[key], propList.slice(1));
-        }
-    }
-
     addEntry(entry){
         let templateInstance = document.importNode(this.template.content, true);
-        let templatedName = (_m, possibleName) => entry.hasOwnProperty(possibleName) ? Pagination.toStringOrEmpty(entry[possibleName]) : Pagination.accessObj(entry, possibleName.split('.')).toString();
+        let templatedName = (_m, possibleName) => entry.hasOwnProperty(possibleName) ? ObjectUtil.toStringOrEmpty(entry[possibleName]) : ObjectUtil.accessObj(entry, possibleName.split('.')).toString();
             
-        templateInstance.querySelectorAll("[data-pagination-href]").forEach( a => a.href = a.dataset.paginationHref.replace(/#\{([^}]*)\}/g, templatedName))
+        templateInstance.querySelectorAll("[data-pagination-href]").forEach( a => a.href = ObjectUtil.valueFromMap(a.dataset.paginationHref, entry))
         templateInstance.querySelectorAll("[data-pagination-map]").forEach( element => {
-            let stringOrTemplate = element.dataset.paginationMap; 
-            if( stringOrTemplate.length == 0 ){
-                element.textContent = entry.toString()
-            }
-            else{
-                if( entry.hasOwnProperty(stringOrTemplate) ){
-                    element.textContent = Pagination.toStringOrEmpty(entry[stringOrTemplate]);
-                }
-                else{
-                    element.textContent = stringOrTemplate.replace(/#\{([^}]*)\}/g, templatedName)
-                }
-            }
+            let key = element.dataset.paginationKey || "textContext";
+            element[key] = ObjectUtil.valueFromMap(element.dataset.paginationMap, entry)
         })
         this.parent.appendChild(templateInstance)
         
         Pagination.listeners.map(fun => fun({ element: this.parent.lastChild, data: entry, id: this.id, url: this.url}));
     }
     static listeners = [];
-    static set onadd(cb){
+    static addListener(cb){
         Pagination.listeners.push(cb);
     }
 }
 
-window.addEventListener("load", () => {
-    let paginationElements = document.querySelectorAll("[data-pagination-url]");
-    paginationElements.forEach( elem => {
-        elem.paginationInstance = new Pagination(elem);
-    })
-})
+ObjectUtil.initialize(Pagination, "[data-pagination-url]")
