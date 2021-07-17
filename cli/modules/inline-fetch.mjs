@@ -17,8 +17,8 @@ export default class InlineFetch{
         let response = await requestJSON(this.url, this.method, this.body);
         
         this.parent.querySelectorAll("[data-inline-fetch-map]").forEach( elem => {
-            let key = elem.dataset.InlineFetchKey || "textContent";
-            elem[key] = ObjectUtil.valueFromMap(elem.dataset.InlineFetchMap, response);
+            let key = elem.dataset.inlineFetchKey || "textContent";
+            elem[key] = ObjectUtil.valueFromMap(elem.dataset.inlineFetchMap, response);
         })
     }
 }
