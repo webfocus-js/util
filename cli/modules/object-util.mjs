@@ -44,6 +44,12 @@ export default class ObjectUtil {
     }
 
     static initialize(klass, selector){
-        window.addEventListener("load", _ => document.querySelectorAll(selector).forEach( elem => new klass(elem)))
+        let run = () => document.querySelectorAll(selector).forEach( elem => new klass(elem));
+        if( document.readyState != 'complete' ){
+            window.addEventListener("load", run)
+        }
+        else{
+            run();
+        }
     }
 }

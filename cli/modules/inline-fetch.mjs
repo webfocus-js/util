@@ -1,6 +1,6 @@
 import ObjectUtil from "./object-util.mjs";
 
-export default class InlineFetch{
+export default window.InlineFetch = class InlineFetch{
     constructor(elem){
         elem.inlineFetchInstance = this;
 

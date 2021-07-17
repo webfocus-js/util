@@ -1,6 +1,6 @@
 import ObjectUtil from './object-util.mjs';
 
-export default class Pagination{
+export default window.Pagination = class Pagination{
     constructor(elem){
         elem.paginationInstance = this;
         this.parent = elem;
