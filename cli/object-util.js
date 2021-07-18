@@ -1,4 +1,4 @@
-export default class ObjectUtil {
+class ObjectUtil {
 
     /**
      * Converts anything to a string. If null or undefined is given returns an empty string otherwise calls `.toString()`
@@ -44,12 +44,6 @@ export default class ObjectUtil {
     }
 
     static initialize(klass, selector){
-        let run = () => document.querySelectorAll(selector).forEach( elem => new klass(elem));
-        if( document.readyState != 'complete' ){
-            window.addEventListener("load", run)
-        }
-        else{
-            run();
-        }
+        document.querySelectorAll(selector).forEach( elem => new klass(elem));
     }
 }

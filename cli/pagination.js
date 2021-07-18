@@ -1,6 +1,4 @@
-import ObjectUtil from './object-util.mjs';
-
-export default window.Pagination = class Pagination{
+window.Pagination = class Pagination{
     constructor(elem){
         elem.paginationInstance = this;
         this.parent = elem;
@@ -70,4 +68,16 @@ export default window.Pagination = class Pagination{
     }
 }
 
-ObjectUtil.initialize(Pagination, "[data-pagination-url]")
+if( window.ObjectUtil == null ){
+    window.addEventListener("load", () => {
+        let script = document.createElement("script");
+        document.body.appendChild(script);
+        script.src = "/util/object-util.js";
+        script.onload = () => {
+            ObjectUtil.initialize(Pagination, "[data-pagination-url]")
+        }
+    })
+}
+else{
+    ObjectUtil.initialize(Pagination, "[data-pagination-url]")
+}
