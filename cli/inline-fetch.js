@@ -32,20 +32,20 @@ if( window.ObjectUtil == null ){
             script.src = "/util/object-util.js";
             script.addEventListener("load", () => {
                 script.fired = true;
-                ObjectUtil.initialize(Pagination, "[data-inline-fetch-url]")
+                ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
             })
         }
         else if( !script.fired ){
             script.addEventListener("load", () => {
                 script.fired = true;
-                ObjectUtil.initialize(Pagination, "[data-inline-fetch-url]")
+                ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
             })   
         }
         else{
-            ObjectUtil.initialize(Pagination, "[data-inline-fetch-url]")
+            ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
         }
     })
 }
 else{
-    ObjectUtil.initialize(Pagination, "[data-inline-fetch-url]")
+    ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
 }
