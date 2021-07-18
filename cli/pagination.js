@@ -70,10 +70,25 @@ window.Pagination = class Pagination{
 
 if( window.ObjectUtil == null ){
     window.addEventListener("load", () => {
-        let script = document.createElement("script");
-        document.body.appendChild(script);
-        script.src = "/util/object-util.js";
-        script.onload = () => {
+        const OBJ_UTIL_ID = "load-object-util-script";
+        let script = document.getElementById(OBJ_UTIL_ID);
+        if(  script == null ){
+            script = document.createElement("script");
+            document.body.appendChild(script);
+            script.id = OBJ_UTIL_ID;
+            script.src = "/util/object-util.js";
+            script.addEventListener("load", () => {
+                script.fired = true;
+                ObjectUtil.initialize(Pagination, "[data-pagination-url]")
+            })
+        }
+        else if( !script.fired ){
+            script.addEventListener("load", () => {
+                script.fired = true;
+                ObjectUtil.initialize(Pagination, "[data-pagination-url]")
+            })   
+        }
+        else{
             ObjectUtil.initialize(Pagination, "[data-pagination-url]")
         }
     })
