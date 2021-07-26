@@ -1,3 +1,6 @@
+
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+
 window.Pagination = class Pagination{
     constructor(elem){
         elem.paginationInstance = this;
@@ -22,7 +25,7 @@ window.Pagination = class Pagination{
     }
 
     async fetch(){
-        let {pages, previous, next, error, length, start, end} = await getJSON(`${this.url}?start=${this.start}&end=${this.start+this.step}`);
+        let {pages, previous, next, errors, length, start, end} = await getJSON(`${this.url}?start=${this.start}&end=${this.start+this.step}`);
 
         let currentSearch = new URLSearchParams(window.location.search);
         let previousSearch = new URLSearchParams(previous);
@@ -33,7 +36,7 @@ window.Pagination = class Pagination{
         currentSearch.set('start', nextSearch.get('start'))
         currentSearch.set('end', nextSearch.get('end'))
         let nextSearchUrl = '?'+currentSearch.toString() 
-        document.querySelectorAll(`[data-pagination-error='${this.id}']`).forEach( elem => elem.textContent = error )
+        document.querySelectorAll(`[data-pagination-error='${this.id}']`).forEach( elem => elem.textContent = errors )
         document.querySelectorAll(`[data-pagination-length='${this.id}']`).forEach( elem => elem.textContent = length )
         document.querySelectorAll(`[data-pagination-start='${this.id}']`).forEach( elem => elem.textContent = start )
         document.querySelectorAll(`[data-pagination-end='${this.id}']`).forEach( elem => elem.textContent = end )
@@ -46,22 +49,49 @@ window.Pagination = class Pagination{
             a.href = nextSearchUrl
         });
 
-        pages.forEach(this.addEntry.bind(this));
+        pages.forEach( (entry, i) => this.addEntry({ value: entry, i, array: pages}));
     }
 
-    addEntry(entry){
-        let templateInstance = document.importNode(this.template.content, true);
-        let templatedName = (_m, possibleName) => entry.hasOwnProperty(possibleName) ? ObjectUtil.toStringOrEmpty(entry[possibleName]) : ObjectUtil.accessObj(entry, possibleName.split('.')).toString();
-            
-        templateInstance.querySelectorAll("[data-pagination-href]").forEach( a => a.href = ObjectUtil.valueFromMap(a.dataset.paginationHref, entry))
+    addEntry(entry, template){
+        if( !template ) template = this.template;
+        let templateInstance = document.importNode(template.content, true);
+
+        templateInstance.querySelectorAll("[data-pagination-href]").forEach( a => a.href = ObjectUtil.stringFromMap(a.dataset.paginationHref, entry))
         templateInstance.querySelectorAll("[data-pagination-map]").forEach( element => {
-            let key = element.dataset.paginationKey || "textContent";
-            element[key] = ObjectUtil.valueFromMap(element.dataset.paginationMap, entry)
+            this.writeValue(element, entry, ObjectUtil.stringFromMap(element.dataset.paginationMap, entry))
         })
-        this.parent.appendChild(templateInstance)
+        templateInstance.querySelectorAll("[data-pagination-function]").forEach(element => {
+            const fun = new AsyncFunction("value", element.dataset.paginationFunction);
+            fun(entry.value).then( content => this.writeValue(element, entry, content))
+        })
+
+        templateInstance.querySelectorAll("[data-pagination-array]").forEach(templateElement => {
+            let array = ObjectUtil.valueFromKeyOrPath(templateElement.dataset.paginationArray, entry) || [];
+            if( !Array.isArray(array) ) return;
+            array.forEach( (arrayEntry, i) => {
+                let entry = { value: arrayEntry, i: i, array };
+                this.addEntry(entry, templateElement);
+            })
+        })
+        template.parentElement.appendChild(templateInstance)
         
-        Pagination.listeners.map(fun => fun({ element: this.parent.lastChild, data: entry, id: this.id, url: this.url}));
+        Pagination.listeners.map(fun => fun({ element: template.parentElement.lastChild, data: entry, id: this.id, url: this.url}));
     }
+
+    writeValue(element, entry, value){
+        let keyAttribute = element.dataset.paginationKey || "textContent";
+        let condFunctionBody = element.dataset.paginationIf || "return true;";
+
+        let condFunction = new AsyncFunction("value", condFunctionBody);
+
+        condFunction(entry.value).then( cond => {
+            if( cond ){
+                element[keyAttribute] = value;
+            }
+        })
+
+    }
+
     static listeners = [];
     static addListener(cb){
         Pagination.listeners.push(cb);
