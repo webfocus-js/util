@@ -1,5 +1,5 @@
 
-const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+window.AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
 
 window.Pagination = class Pagination{
     constructor(elem){

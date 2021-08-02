@@ -14,7 +14,7 @@ window.InlineFetch = class InlineFetch{
     }
 
     async fetch(){
-        let entry = await requestJSON(this.url, this.method, this.body);
+        let entry = { value: await requestJSON(this.url, this.method, this.body) };
         
         this.parent.querySelectorAll("[data-inline-fetch-href]").forEach( a => a.href = ObjectUtil.stringFromMap(a.dataset.inlineFetchHref, entry))
         this.parent.querySelectorAll("[data-inline-fetch-map]").forEach( elem => {
