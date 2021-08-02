@@ -62,7 +62,7 @@ window.Pagination = class Pagination{
         })
         templateInstance.querySelectorAll("[data-pagination-function]").forEach(element => {
             const fun = new AsyncFunction("value", element.dataset.paginationFunction);
-            fun(entry.value).then( content => this.writeValue(element, entry, content))
+            fun.call(element, entry.value).then( content => this.writeValue(element, entry, content))
         })
 
         templateInstance.querySelectorAll("[data-pagination-array]").forEach(templateElement => {
@@ -98,31 +98,4 @@ window.Pagination = class Pagination{
     }
 }
 
-if( window.ObjectUtil == null ){
-    window.addEventListener("load", () => {
-        const OBJ_UTIL_ID = "load-object-util-script";
-        let script = document.getElementById(OBJ_UTIL_ID);
-        if(  script == null ){
-            script = document.createElement("script");
-            document.body.appendChild(script);
-            script.id = OBJ_UTIL_ID;
-            script.src = "/util/object-util.js";
-            script.addEventListener("load", () => {
-                script.fired = true;
-                ObjectUtil.initialize(Pagination, "[data-pagination-url]")
-            })
-        }
-        else if( !script.fired ){
-            script.addEventListener("load", () => {
-                script.fired = true;
-                ObjectUtil.initialize(Pagination, "[data-pagination-url]")
-            })   
-        }
-        else{
-            ObjectUtil.initialize(Pagination, "[data-pagination-url]")
-        }
-    })
-}
-else{
-    ObjectUtil.initialize(Pagination, "[data-pagination-url]")
-}
+loadScript('ObjectUtil', "/util/object-util.js", () => ObjectUtil.initialize(Pagination, "[data-pagination-url]"));

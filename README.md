@@ -39,6 +39,8 @@ This script makes a GET request to an url provided.
 
  - Improve Documentation
 
+ - Complete inline-fetch functions
+
 ## Author
 
 Diogo Almiro

@@ -1,3 +1,5 @@
+window.AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+
 window.InlineFetch = class InlineFetch{
     constructor(elem){
         elem.inlineFetchInstance = this;
@@ -12,40 +14,36 @@ window.InlineFetch = class InlineFetch{
     }
 
     async fetch(){
-        let response = await requestJSON(this.url, this.method, this.body);
+        let entry = await requestJSON(this.url, this.method, this.body);
         
+        this.parent.querySelectorAll("[data-inline-fetch-href]").forEach( a => a.href = ObjectUtil.stringFromMap(a.dataset.inlineFetchHref, entry))
         this.parent.querySelectorAll("[data-inline-fetch-map]").forEach( elem => {
-            let key = elem.dataset.inlineFetchKey || "textContent";
-            elem[key] = ObjectUtil.valueFromMap(elem.dataset.inlineFetchMap, response);
+            this.writeValue(elem, entry, ObjectUtil.stringFromMap(elem.dataset.inlineFetchMap, entry))
         })
+        this.parent.querySelectorAll("[data-inline-fetch-function]").forEach(element => {
+            const fun = new AsyncFunction("value", element.dataset.inlineFetchFunction);
+            fun.call(element, entry.value).then( content => this.writeValue(element, entry, content))
+        })
+
+        this.parent.querySelectorAll("[data-inline-fetch-array]").forEach(templateElement => {
+            console.error("Invalid. data-inline-fetch-array was not implemented.")
+        })
+    }
+
+
+    writeValue(element, entry, value){
+        let keyAttribute = element.dataset.inlineFetchKey || "textContent";
+        let condFunctionBody = element.dataset.inlineFetchIf || "return true;";
+
+        let condFunction = new AsyncFunction("value", condFunctionBody);
+
+        condFunction(entry.value).then( cond => {
+            if( cond ){
+                element[keyAttribute] = value;
+            }
+        })
+
     }
 }
 
-if( window.ObjectUtil == null ){
-    window.addEventListener("load", () => {
-        const OBJ_UTIL_ID = "load-object-util-script";
-        let script = document.getElementById(OBJ_UTIL_ID);
-        if(  script == null ){
-            script = document.createElement("script");
-            document.body.appendChild(script);
-            script.id = OBJ_UTIL_ID;
-            script.src = "/util/object-util.js";
-            script.addEventListener("load", () => {
-                script.fired = true;
-                ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
-            })
-        }
-        else if( !script.fired ){
-            script.addEventListener("load", () => {
-                script.fired = true;
-                ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
-            })   
-        }
-        else{
-            ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
-        }
-    })
-}
-else{
-    ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]")
-}
+loadScript('ObjectUtil', "/util/object-util.js", () => ObjectUtil.initialize(InlineFetch, "[data-inline-fecth-url]"));
