@@ -46,4 +46,4 @@ window.InlineFetch = class InlineFetch{
     }
 }
 
-loadScript('ObjectUtil', "/util/object-util.js", () => ObjectUtil.initialize(InlineFetch, "[data-inline-fecth-url]"));
+loadScript('ObjectUtil', "/util/object-util.js", () => ObjectUtil.initialize(InlineFetch, "[data-inline-fetch-url]"));
