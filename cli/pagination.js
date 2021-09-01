@@ -36,6 +36,7 @@ window.Pagination = class Pagination{
         currentSearch.set('start', nextSearch.get('start'))
         currentSearch.set('end', nextSearch.get('end'))
         let nextSearchUrl = '?'+currentSearch.toString() 
+        document.querySelectorAll(`[data-pagination-loading='${this.id}']`).forEach( elem => elem.parentElement.removeChild(elem) )
         document.querySelectorAll(`[data-pagination-error='${this.id}']`).forEach( elem => elem.textContent = errors )
         document.querySelectorAll(`[data-pagination-length='${this.id}']`).forEach( elem => elem.textContent = length )
         document.querySelectorAll(`[data-pagination-start='${this.id}']`).forEach( elem => elem.textContent = start )
