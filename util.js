@@ -59,8 +59,7 @@ module.exports.pagination = (listGetterPromise, filter=null, map=null, step=20) 
     }
 }
 
-module.exports.serversideevents = (component, events, initCB) => (req, res) => {
-    component.debug("Preparing Server Side Event Listeners")
+module.exports.serversideevents = (evtEmitter, events, initCB) => (req, res) => {
     // Prepare Event Source
     res.set({
         'Cache-Control': 'no-cache',
@@ -75,12 +74,11 @@ module.exports.serversideevents = (component, events, initCB) => (req, res) => {
             res.write(`event: ${e}\n`);
             res.write(`data: ${JSON.stringify(data)}\n\n`)
         }
-        component.on(e, listeners[e]);
+        evtEmitter.on(e, listeners[e]);
     })
 
     res.socket.on('close', () => {
-        component.debug("Removing Server Side Event Listeners")
-        events.forEach(e => component.off(e, listeners[e]))
+        events.forEach(e => evtEmitter.off(e, listeners[e]))
     })
 
     if( typeof initCB === 'function' ){
